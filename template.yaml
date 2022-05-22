@@ -1,0 +1,47 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  aws-lambda-nodejs-example
+
+  Sample SAM Template for aws-lambda-nodejs-example
+  
+# More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
+Globals:
+  Function:
+    Timeout: 3
+
+Resources:
+  okApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName: Prod
+      Auth:
+        DefaultAuthorizer: CustomAuthorizer
+        Authorizers:
+         CustomAuthorizer: 
+          FunctionArn: !GetAtt DocustomAuthorizer.Arn
+  
+  DocustomAuthorizer:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: auth/
+      Handler: auth.lambdaHandler
+      Runtime: nodejs14.x
+
+
+  HelloWorldFunction:
+    Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
+    Properties:
+      CodeUri: hello-world/
+      Handler: app.lambdaHandler
+      Runtime: nodejs14.x
+      Architectures:
+        - x86_64
+      Events:
+        HelloWorld:
+          Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
+          Properties:
+            RestApiId: !Ref okApi
+            Path: /hello
+            Method: get
+
